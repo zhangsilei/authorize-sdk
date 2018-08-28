@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>test authorize-sdk</title>
+    <style>
+        button {
+            padding: 10px;
+            background: #fff;
+            border: 1px solid #ccc;
+            outline: none;
+        }
+        
+        button:active {
+            background: #ccc;
+            border: 1px solid #fff;
+        }
+    </style>
+</head>
+
+<body>
+    <button class="fb">Facebook Login</button>
+    <button class="gg">Google Login</button>
+    <button class="gg">QQ Login</button>
+    <script src="../dist/authorize-sdk.js"></script>
+    <script>
+        window.onload = function() {
+            document.querySelector('.fb').onclick = function() {
+                var fbAuth = authorize.init('Facebook', {
+                    appId: 107953139539588
+                });
+                fbAuth.login(function(userData) {
+                    console.log(userData);
+                    // success handel action...
+                }, function() {
+                    // fail handel action...
+                });
+            };
+            document.querySelector('.gg').onclick = function() {
+                var ggAuth = authorize.init('Google', {
+                    client_id: '81555039836-5d77g80ig2ou2gc1fmsi127ain5292j1.apps.googleusercontent.com'
+                });
+                ggAuth.login(this, function(userData) {
+                    console.log(userData);
+                    // success handel action...
+                }, function() {
+                    // fail handel action...
+                });
+            };
+        };
+    </script>
+</body>
+
+</html>
