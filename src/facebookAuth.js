@@ -55,19 +55,30 @@ var FacebookAuthorize = {
      * @param {Function} fail 取消授权回调
      */
     login: function(success, fail) {
-        if (FB !== undefined && Object.getOwnPropertyNames(FB).length) {
-            this.checkFbLoginStatus(userData => {
-                if (userData) {
-                    (success && typeof success === 'function') && success(userData);
-                } else {
-                    (fail && typeof fail === 'function') && fail();
+        let timer = setInterval(() => {
+            try {
+                if (FB !== undefined && Object.getOwnPropertyNames(FB).length) {
+                    clearInterval(timer);
+                    console.log('in....')
+                    this.checkFbLoginStatus(userData => {
+                        if (userData) {
+                            (success && typeof success === 'function') && success(userData);
+                        } else {
+                            (fail && typeof fail === 'function') && fail();
+                        }
+                    });
                 }
-            });
-        }
+            } catch (err) {
+                console.log('Running facebook sdk...');
+            }
+        }, 10);
     },
 
     checkFbLoginStatus: function(cb) {
+        console.log('checkFbLoginStatus...')
+        console.log(FB)
         FB.getLoginStatus(response => {
+            console.log('getLoginStatus.....')
             if (response.status === 'connected') { // 已授权登录
                 this.connectedCallBack(cb);
             } else { // 未授权登录
