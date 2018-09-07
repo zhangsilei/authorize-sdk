@@ -20,24 +20,29 @@
 
 'use strict';
 
-import log from './log';
+import log from '../common/log';
+import { loadScript } from '../common/util';
 
-var auth2 = null;
+class GoogleAuthorize {
+    constructor() {
+        this.auth2;
+        this.GG_inited = false;
+    }
 
-var GoogleAuthorize = {
-    init: function(options) {
-        this.loadScript('https://apis.google.com/js/api:client.js', function() {
-            gapi.load('auth2', function() {
-                auth2 = gapi.auth2.init({
+    static init(options) {
+        loadScript('https://apis.google.com/js/api:client.js', () => {
+            gapi.load('auth2', () => {
+                this.auth2 = gapi.auth2.init({
                     client_id: options.client_id || 0,
                     cookiepolicy: options.cookiepolicy || 'single_host_origin',
                     scope: options.scope || 'profile'
                 });
+                this.GG_inited = true;
                 log.info('Init google sdk...');
             });
             log.info('Loading google sdk...');
         });
-    },
+    }
 
     /**
      * google 登录授权入口方法
@@ -46,9 +51,9 @@ var GoogleAuthorize = {
      * @param {Function} success 成功授权回调
      * @param {Function} fail 取消授权回调
      */
-    login: function(el, success, fail) {
-        if (auth2 !== undefined && Object.getOwnPropertyNames(auth2).length) {
-            auth2.attachClickHandler(el, {}, userData => {
+    static login(el, success, fail) {
+        if (this.GG_inited) {
+            this.auth2.attachClickHandler(el, {}, userData => {
                 (success && typeof success === 'function') && success(userData);
                 log.info('User data in google: ' + JSON.stringify(userData));
                 // var profile = auth2.currentUser.get().getBasicProfile();
@@ -57,34 +62,12 @@ var GoogleAuthorize = {
                 // var head = profile.getImageUrl()
                 // var email = profile.getEmail()
                 // var token = userData.getAuthResponse().access_token
-            }, function(err) {
+            }, (err) => {
                 (fail && typeof fail === 'function') && fail();
                 log.info('Cancel authorize: ' + JSON.stringify(err));
             });
             el.click();
         }
-    },
-
-    loadScript: function(url, callback) {
-        let script = document.createElement("script");
-        script.type = "text/javascript";
-
-        if (callback && typeof callback === 'function') {
-            if (script.readyState) {
-                script.onreadystatechange = function() {
-                    if (script.readyState == "loaded" || script.readyState == "complete") {
-                        script.onreadystatechange = null;
-                        callback();
-                    }
-                };
-            } else {
-                script.onload = function() {
-                    callback();
-                };
-            }
-        }
-        script.src = url;
-        document.body.appendChild(script);
     }
 }
 

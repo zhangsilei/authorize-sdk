@@ -22,10 +22,14 @@
 
 'use strict';
 
-import log from './log';
+import log from '../common/log';
 
-var FacebookAuthorize = {
-    init: function(options) {
+class FacebookAuthorize {
+    constructor() {
+        this.FB_inited = false;
+    }
+
+    static init(options) {
         window.fbAsyncInit = () => {
             FB.init({
                 appId: options.appId || 0,
@@ -33,6 +37,7 @@ var FacebookAuthorize = {
                 xfbml: options.xfbml || true,
                 version: options.version || 'v3.0'
             });
+            this.FB_inited = true;
             log.info('Init facebook sdk...');
         };
         (function(d, s, id) {
@@ -46,7 +51,7 @@ var FacebookAuthorize = {
             fjs.parentNode.insertBefore(js, fjs);
             log.info('Loading facebook sdk...');
         }(document, 'script', 'facebook-jssdk'));
-    },
+    }
 
     /**
      * facebook 登录授权入口方法
@@ -54,54 +59,51 @@ var FacebookAuthorize = {
      * @param {Function} success 成功授权回调
      * @param {Function} fail 取消授权回调
      */
-    login: function(success, fail) {
+    static login(success, fail) {
         let timer = setInterval(() => {
-            try {
-                if (FB !== undefined && Object.getOwnPropertyNames(FB).length) {
-                    clearInterval(timer);
-                    console.log('in....')
-                    this.checkFbLoginStatus(userData => {
-                        if (userData) {
-                            (success && typeof success === 'function') && success(userData);
-                        } else {
-                            (fail && typeof fail === 'function') && fail();
-                        }
-                    });
-                }
-            } catch (err) {
-                console.log('Running facebook sdk...');
+            if (this.FB_inited) {
+                this.checkFbLoginStatus(userData => {
+                    if (userData) {
+                        (success && typeof success === 'function') && success(userData);
+                    } else {
+                        (fail && typeof fail === 'function') && fail();
+                    }
+                });
+                clearInterval(timer);
             }
         }, 10);
-    },
+    }
 
-    checkFbLoginStatus: function(cb) {
-        console.log('checkFbLoginStatus...')
-        console.log(FB)
-        FB.getLoginStatus(response => {
-            console.log('getLoginStatus.....')
-            if (response.status === 'connected') { // 已授权登录
-                this.connectedCallBack(cb);
-            } else { // 未授权登录
-                if (response.status === 'not_authorized') {
-                    log.warn('Already logged in, but not authorized.');
-                }
-                if (response.status === 'unknown') {
-                    log.warn('Not logged in and authorized.');
-                }
-                this.loginCallBack(cb);
+    static checkFbLoginStatus(cb) {
+        let timer = setInterval(() => {
+            if (this.FB_inited) {
+                FB.getLoginStatus(response => {
+                    if (response.status === 'connected') { // 已授权登录
+                        this.connectedCallBack(cb);
+                    } else { // 未授权登录
+                        if (response.status === 'not_authorized') {
+                            log.warn('Already logged in, but not authorized.');
+                        }
+                        if (response.status === 'unknown') {
+                            log.warn('Not logged in and authorized.');
+                        }
+                        this.loginCallBack(cb);
+                    }
+                });
+                clearInterval(timer);
             }
-        });
-    },
+        }, 10);
+    }
 
-    connectedCallBack: function(cb) {
+    static connectedCallBack(cb) {
         FB.api('/me?fields=id,name,picture', userData => {
             cb(userData);
             log.info('User data in facebook: ' + JSON.stringify(userData));
         });
         log.info('Authorize success.');
-    },
+    }
 
-    loginCallBack: function(cb) {
+    static loginCallBack(cb) {
         FB.login(response => {
             if (response.status === 'connected') {
                 this.connectedCallBack(cb);
@@ -110,6 +112,6 @@ var FacebookAuthorize = {
             }
         });
     }
-};
+}
 
 export default FacebookAuthorize;

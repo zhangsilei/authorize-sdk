@@ -5,8 +5,8 @@
  */
 'use strict';
 
-import FacebookAuthorize from './facebookAuth';
-import GoogleAuthorize from './googleAuth';
+import FacebookAuthorize from './auth/FacebookAuth';
+import GoogleAuthorize from './auth/googleAuth';
 
 (function(global) {
 
