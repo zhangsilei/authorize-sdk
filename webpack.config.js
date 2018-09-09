@@ -2,7 +2,7 @@ const path = require('path');
 const uglify = require('uglifyjs-webpack-plugin');
 
 let config = {
-    mode: 'production',
+    mode: '',
     entry: path.join(__dirname, 'src', 'entry'),
     output: {
         filename: 'authorize-sdk.js',
