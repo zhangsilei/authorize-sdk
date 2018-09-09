@@ -27,21 +27,24 @@ class GoogleAuthorize {
     constructor() {
         this.auth2;
         this.GG_inited = false;
+        this.clicked = false;
     }
 
     static init(options) {
-        loadScript('https://apis.google.com/js/api:client.js', () => {
-            gapi.load('auth2', () => {
-                this.auth2 = gapi.auth2.init({
-                    client_id: options.client_id || 0,
-                    cookiepolicy: options.cookiepolicy || 'single_host_origin',
-                    scope: options.scope || 'profile'
+        if (!this.GG_inited) {
+            loadScript('https://apis.google.com/js/api:client.js', () => {
+                gapi.load('auth2', () => {
+                    this.auth2 = gapi.auth2.init({
+                        client_id: options.client_id || 0,
+                        cookiepolicy: options.cookiepolicy || 'single_host_origin',
+                        scope: options.scope || 'profile'
+                    });
+                    this.GG_inited = true;
+                    log.info('Init google sdk...');
                 });
-                this.GG_inited = true;
-                log.info('Init google sdk...');
+                log.info('Loading google sdk...');
             });
-            log.info('Loading google sdk...');
-        });
+        }
     }
 
     /**
@@ -52,22 +55,28 @@ class GoogleAuthorize {
      * @param {Function} fail 取消授权回调
      */
     static login(el, success, fail) {
-        if (this.GG_inited) {
-            this.auth2.attachClickHandler(el, {}, userData => {
-                (success && typeof success === 'function') && success(userData);
-                log.info('User data in google: ' + JSON.stringify(userData));
-                // var profile = auth2.currentUser.get().getBasicProfile();
-                // var userId = profile.getId()
-                // var nickName = profile.getName()
-                // var head = profile.getImageUrl()
-                // var email = profile.getEmail()
-                // var token = userData.getAuthResponse().access_token
-            }, (err) => {
-                (fail && typeof fail === 'function') && fail();
-                log.info('Cancel authorize: ' + JSON.stringify(err));
-            });
-            el.click();
-        }
+        let timer = setInterval(() => {
+            if (this.GG_inited) {
+                this.auth2.attachClickHandler(el, {}, userData => {
+                    (success && typeof success === 'function') && success(userData);
+                    log.info('User data in google: ' + JSON.stringify(userData));
+                    // var profile = auth2.currentUser.get().getBasicProfile();
+                    // var userId = profile.getId()
+                    // var nickName = profile.getName()
+                    // var head = profile.getImageUrl()
+                    // var email = profile.getEmail()
+                    // var token = userData.getAuthResponse().access_token
+                }, (err) => {
+                    (fail && typeof fail === 'function') && fail();
+                    log.info('Cancel authorize: ' + JSON.stringify(err));
+                });
+                if (!this.clicked) {
+                    el.click();
+                    this.clicked = true;
+                }
+                clearInterval(timer);
+            }
+        }, 10);
     }
 }
 
