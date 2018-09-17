@@ -7,6 +7,7 @@
 
 import FacebookAuthorize from './auth/FacebookAuth';
 import GoogleAuthorize from './auth/googleAuth';
+import QQAuthorize from './auth/QQAuth';
 
 (function(global) {
 
@@ -29,7 +30,7 @@ import GoogleAuthorize from './auth/googleAuth';
 
         source = source.toLowerCase();
 
-        if (!new String(source).match(/facebook|google/)) {
+        if (!new String(source).match(/facebook|google|qq/)) {
             // 判断接入平台是否支持
             return console.warn('Supported source: facebook & google, not \"' + source + '\" yet');
         }
@@ -53,6 +54,9 @@ import GoogleAuthorize from './auth/googleAuth';
                 GoogleAuthorize.init(settings);
                 originAnthorize = GoogleAuthorize;
                 break;
+            case 'qq':
+                QQAuthorize.init(settings);
+                originAnthorize = QQAuthorize;
         }
         return originAnthorize;
     }

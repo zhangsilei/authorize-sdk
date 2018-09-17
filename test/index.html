@@ -24,27 +24,41 @@
 <body>
     <button class="fb">Facebook Login</button>
     <button class="gg">Google Login</button>
-    <button class="qq">QQ Login</button>
+    <button class="qq" id="qq">QQ Login</button>
     <script src="../dist/authorize-sdk.js"></script>
     <script>
         window.onload = function() {
+            // facebook login
             document.querySelector('.fb').onclick = function() {
                 var fbAuth = authorize.init('Facebook', {
-                    appId: 235239207145221 // 107953139539588
+                    appId: 235239207145221
                 });
                 fbAuth.login(function(userData) {
-                    console.log(userData);
                     // success handel action...
                 }, function() {
                     // fail handel action...
                 });
             };
+
+            // google login
             document.querySelector('.gg').onclick = function() {
                 var ggAuth = authorize.init('Google', {
                     client_id: '68029027430-skmgemjg78dj5buqh00qp9gv1q9j7hri.apps.googleusercontent.com'
                 });
                 ggAuth.login(this, function(userData) {
-                    console.log(userData);
+                    // success handel action...
+                }, function() {
+                    // fail handel action...
+                });
+            };
+
+            // qq login
+            document.querySelector('.qq').onclick = function() {
+                var qqAuth = authorize.init('qq', {
+                    appId: 1107778683,
+                    redirectURI: 'https://zhangsilei.github.io/authorize-sdk/index'
+                });
+                qqAuth.login(function(userData) {
                     // success handel action...
                 }, function() {
                     // fail handel action...
