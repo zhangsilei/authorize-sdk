@@ -11,9 +11,10 @@ class QQAuthorize {
     static init(options) {
         let url = '//connect.qq.com/qc_jssdk.js';
         let attrs = [{
+            'type': 'text/javascript',
+            'charset': 'utf-8',
             'data-appid': options.appId || 0,
-            'data-redirecturi': options.redirectURI || '',
-            'charset': 'utf-8'
+            'data-redirecturi': options.redirectURI || ''
         }];
 
         loadScript(url, attrs, () => {
@@ -26,14 +27,19 @@ class QQAuthorize {
         let timer = setInterval(() => {
             if (this.QQ_inited) {
                 QC.Login.showPopup();
-                // QC.Login({
-                //     btnId: 'qq'
-                // }, (reqData, opts) => {
-                //     console.log(reqData, opts)
-                // });
+                if (QC.Login.check()) {
+                    QC.Login.getMe(function(openId, accessToken) {
+                        console.log(openId, accessToken);
+                    })
+                    this.getUserInfo();
+                }
                 clearInterval(timer);
             }
         }, 10);
+    }
+
+    static getUserInfo() {
+        // QC.api('get_user_info')
     }
 }
 
